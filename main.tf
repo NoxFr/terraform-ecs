@@ -32,6 +32,6 @@ resource "aws_db_instance" "planka-db" {
   engine               = "postgres"
   engine_version       = "13"
   instance_class       = "db.t3.micro"
-  username             = "foo"
-  password             = "foobarbaz"
+  username             = var.db_username
+  password             = var.db_password
 }
