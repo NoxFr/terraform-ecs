@@ -45,6 +45,16 @@ variable "vpc_id" {
   type = string
 }
 
+variable "vpc_subnets" {
+  description = "VPC subnets"
+  type = list(string)
+}
+
+variable "vpc_igw" {
+  description = "VPC IGW"
+  type = string
+}
+
 variable "extra_environment" {
   description = "Extra environment variables"
   type = map(string)

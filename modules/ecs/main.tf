@@ -3,27 +3,23 @@ resource "aws_ecs_cluster" "cluster" {
 }
 
 resource "aws_ecs_service" "service" {
-  name            = var.ecs_service_name
-  cluster         = aws_ecs_cluster.cluster.id
-  task_definition = aws_ecs_task_definition.service.arn
+  name                = var.ecs_service_name
+  cluster             = aws_ecs_cluster.cluster.id
+  task_definition     = aws_ecs_task_definition.service.arn
   scheduling_strategy = "REPLICA"
-  desired_count = 2
-  launch_type = "FARGATE"
+  desired_count       = 2
+  launch_type         = "FARGATE"
 
   network_configuration {
-    security_groups  = [aws_security_group.ecs_tasks.id]
-    subnets            = [
-      aws_subnet.sn-public-1.id,
-      aws_subnet.sn-public-2.id,
-      aws_subnet.sn-public-3.id
-    ]
+    security_groups = [aws_security_group.ecs_tasks.id]
+    subnets          = var.vpc_subnets
     assign_public_ip = true
   }
 
   load_balancer {
     target_group_arn = aws_lb_target_group.tg-ecs.arn
-    container_name = var.container_name
-    container_port = var.container_port
+    container_name   = var.container_name
+    container_port   = var.container_port
   }
 
   depends_on = [
@@ -33,25 +29,27 @@ resource "aws_ecs_service" "service" {
 }
 
 resource "aws_ecs_task_definition" "service" {
-  family = var.ecs_task_family
+  family       = var.ecs_task_family
   network_mode = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu = 256
-  memory = 512
-
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  cpu          = 256
+  memory       = 512
+  ephemeral_storage {
+    size_in_gib = 1
+  }
+  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   container_definitions = jsonencode([
     {
-      name      = var.container_name
-      image     = var.docker_image,
+      name  = var.container_name
+      image = var.docker_image,
       repositoryCredentials = {
         credentialsParameter = var.docker_registry_secret_arn
       },
       logConfiguration = {
         logDriver = "awslogs",
         options = {
-          awslogs-group = var.ecs_service_name,
-          awslogs-region = var.aws_region,
+          awslogs-group         = var.ecs_service_name,
+          awslogs-region        = var.aws_region,
           awslogs-stream-prefix = "ecs"
         }
       },
@@ -70,12 +68,8 @@ resource "aws_ecs_task_definition" "service" {
 resource "aws_lb" "lb-ecs" {
   name               = "${var.ecs_service_name}-alb"
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.loadbalancer.id]
-  subnets            = [
-    aws_subnet.sn-public-1.id,
-    aws_subnet.sn-public-2.id,
-    aws_subnet.sn-public-3.id
-  ]
+  security_groups = [aws_security_group.loadbalancer.id]
+  subnets            = var.vpc_subnets
 }
 
 resource "aws_lb_listener" "https_forward" {
@@ -90,11 +84,11 @@ resource "aws_lb_listener" "https_forward" {
 }
 
 resource "aws_lb_target_group" "tg-ecs" {
-  name     = "${var.ecs_service_name}-tg"
-  port     = 80
-  protocol = "HTTP"
+  name        = "${var.ecs_service_name}-tg"
+  port        = 80
+  protocol    = "HTTP"
   target_type = "ip"
-  vpc_id   = var.vpc_id
+  vpc_id      = var.vpc_id
 
   health_check {
     healthy_threshold   = "3"
