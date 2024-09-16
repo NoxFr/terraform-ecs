@@ -17,7 +17,7 @@ module "ecs" {
   ecs_task_family = "planka"
 
   docker_image = "ghcr.io/plankanban/planka:1.21.1"
-  docker_registry_secret_arn = "arn:aws:secretsmanager:eu-west-3:746757319801:secret:Github-4GACmG"
+  docker_registry_secret_arn = "arn:aws:secretsmanager:${var.aws_region}:746757319801:secret:Github-4GACmG"
   container_port = 1337
   container_name = "planka"
   extra_environment = {

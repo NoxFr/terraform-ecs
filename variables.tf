@@ -17,9 +17,11 @@ variable "tags" {
 variable "db_username" {
   description = "Database username"
   type = string
+  default = "postgres"
 }
 
 variable "db_password" {
   description = "Database password"
   type = string
+  default = "postgres131331"
 }
