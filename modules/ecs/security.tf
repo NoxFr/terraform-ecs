@@ -10,6 +10,14 @@ resource "aws_security_group" "ecs_tasks" {
     cidr_blocks = ["0.0.0.0/0"]
     security_groups = [aws_security_group.loadbalancer.id]
   }
+
+  egress {
+    description = "Allow outbound traffic to docker registry"
+    protocol  = "TCP"
+    from_port = 443
+    to_port   = 443
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_security_group" "loadbalancer" {
@@ -24,9 +32,9 @@ resource "aws_security_group" "loadbalancer" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
+    protocol  = "-1"
+    from_port = 0
+    to_port   = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
 }

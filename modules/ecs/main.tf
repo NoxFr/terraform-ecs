@@ -29,27 +29,20 @@ resource "aws_ecs_service" "service" {
 }
 
 resource "aws_ecs_task_definition" "service" {
-  family       = var.ecs_task_family
-  network_mode = "awsvpc"
+  family             = var.ecs_task_family
+  network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu          = 256
-  memory       = 512
+  cpu                = 256
+  memory             = 512
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn      = aws_iam_role.ecs_task_execution_role.arn
   container_definitions = jsonencode([
     {
       name  = var.container_name
       image = var.docker_image,
       repositoryCredentials = {
         credentialsParameter = var.docker_registry_secret_arn
-      },
-      logConfiguration = {
-        logDriver = "awslogs",
-        options = {
-          awslogs-group         = var.ecs_service_name,
-          awslogs-region        = var.aws_region,
-          awslogs-stream-prefix = "ecs"
-        }
-      },
+      }
       environment = [var.extra_environment]
       portMappings = [
         {
