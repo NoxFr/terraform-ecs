@@ -4,7 +4,7 @@ resource "aws_security_group" "ecs_tasks" {
   vpc_id      = var.vpc_id
 
   ingress {
-    protocol  = "tcp"
+    protocol  = "TCP"
     from_port = var.container_port
     to_port   = var.container_port
     cidr_blocks = ["0.0.0.0/0"]
@@ -12,10 +12,9 @@ resource "aws_security_group" "ecs_tasks" {
   }
 
   egress {
-    description = "Allow outbound traffic to docker registry"
-    protocol  = "TCP"
-    from_port = 443
-    to_port   = 443
+    protocol  = "-1"
+    from_port = 0
+    to_port   = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
 }

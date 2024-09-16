@@ -45,7 +45,12 @@ variable "vpc_id" {
   type = string
 }
 
-variable "vpc_subnets" {
+variable "public_vpc_subnets" {
+  description = "VPC subnets"
+  type = list(string)
+}
+
+variable "database_vpc_subnets" {
   description = "VPC subnets"
   type = list(string)
 }

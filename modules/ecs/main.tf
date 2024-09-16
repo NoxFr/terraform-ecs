@@ -12,7 +12,7 @@ resource "aws_ecs_service" "service" {
 
   network_configuration {
     security_groups = [aws_security_group.ecs_tasks.id]
-    subnets          = var.vpc_subnets
+    subnets          = concat(var.public_vpc_subnets , var.database_vpc_subnets)
     assign_public_ip = true
   }
 
@@ -32,15 +32,26 @@ resource "aws_ecs_task_definition" "service" {
   family             = var.ecs_task_family
   network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                = 256
-  memory             = 512
+  cpu                = 1024
+  memory             = 2048
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+
   container_definitions = jsonencode([
     {
       name  = var.container_name
       image = var.docker_image,
+      essential = true
       repositoryCredentials = {
         credentialsParameter = var.docker_registry_secret_arn
+      }
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-create-group  = "true",
+          awslogs-group         = var.ecs_service_name,
+          awslogs-region        = var.aws_region,
+          awslogs-stream-prefix = "ecs"
+        }
       }
       environment = [var.extra_environment]
       portMappings = [
@@ -58,7 +69,7 @@ resource "aws_lb" "lb-ecs" {
   name               = "${var.ecs_service_name}-alb"
   load_balancer_type = "application"
   security_groups = [aws_security_group.loadbalancer.id]
-  subnets            = var.vpc_subnets
+  subnets            = var.public_vpc_subnets
 }
 
 resource "aws_lb_listener" "https_forward" {

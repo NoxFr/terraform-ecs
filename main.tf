@@ -41,7 +41,8 @@ module "ecs" {
   aws_region  = var.aws_region
 
   vpc_id = module.vpc.vpc_id
-  vpc_subnets = [module.vpc.public_subnets[0], module.vpc.public_subnets[1], module.vpc.public_subnets[2]]
+  public_vpc_subnets = module.vpc.public_subnets
+  database_vpc_subnets = module.vpc.database_subnets
   vpc_igw = module.vpc.igw_id
 
   ecs_cluster_name = "test-cluster"
@@ -53,7 +54,8 @@ module "ecs" {
   container_port = 1337
   container_name = "planka"
   extra_environment = {
-    "DATABASE_URL" = "postgresql://${aws_db_instance.planka-db.username}:${aws_db_instance.planka-db.password}@${aws_db_instance.planka-db.address}:${aws_db_instance.planka-db.port}/planka"
+    "name": "DATABASE_URL"
+    "value": "postgresql://${aws_db_instance.planka-db.username}:${aws_db_instance.planka-db.password}@${aws_db_instance.planka-db.address}:${aws_db_instance.planka-db.port}/planka"
   }
 }
 
