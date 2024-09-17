@@ -64,11 +64,12 @@ resource "aws_db_instance" "planka-db" {
   allocated_storage    = 10
   db_name              = "planka"
   engine               = "postgres"
-  engine_version       = "13"
+  engine_version       = "16.3"
   instance_class       = "db.t4g.micro"
   username             = var.db_username
   password             = var.db_password
   skip_final_snapshot  = false
+  allow_major_version_upgrade = true
   final_snapshot_identifier = "planka-db-final-snapshot"
   db_subnet_group_name = module.vpc.database_subnet_group_name
 }
